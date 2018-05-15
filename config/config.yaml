@@ -1,0 +1,10 @@
+monitorHosts:
+  host45:
+    address: tcp://192.168.9.87:2375
+    apiVersion: 1.24
+  host54:
+    address: tcp://192.168.9.54:2375
+    apiVersion: 1.24
+intervalTime: 2s
+monitorTime: 20h
+monitorSwitch: false
