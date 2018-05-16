@@ -6,12 +6,12 @@ import (
 	"gonum.org/v1/plot/plotutil"
 	"gonum.org/v1/plot/vg"
 	"strconv"
-	//"sync"
 )
 
 type ContainstatsPlot struct {
 	HostName      string
 	ContainerName string
+	IntervalTime  float64
 	Plot          *plot.Plot
 }
 
@@ -30,7 +30,7 @@ type XYData struct {
 
 var plotHandlers map[string]*ContainstatsPlot
 
-func NewHandlerPlot(hostName string, containName string) *ContainstatsPlot {
+func NewHandlerPlot(hostName string, containName string, intervalTime float64) *ContainstatsPlot {
 	if plotHandlers == nil {
 		plotHandlers = make(map[string]*ContainstatsPlot)
 	}
@@ -38,7 +38,7 @@ func NewHandlerPlot(hostName string, containName string) *ContainstatsPlot {
 		return handler
 	}
 	p, _ := plot.New()
-	plotHandlers[containName] = &ContainstatsPlot{HostName: hostName, ContainerName: containName, Plot: p}
+	plotHandlers[containName] = &ContainstatsPlot{HostName: hostName, ContainerName: containName, IntervalTime: intervalTime, Plot: p}
 	return plotHandlers[containName]
 }
 func (cp *ContainstatsPlot) MakeChart(ci ChartInfo) {
@@ -108,10 +108,18 @@ func (cp *ContainstatsPlot) FormatChartData(cs []ContainerStatsSpec) []ChartInfo
 			netout_chart = append(netout_chart, XYData{readTime, netOut})
 			continue
 		}
+
+		intervalTime := cp.IntervalTime
 		previousNetIN, _ := strconv.ParseFloat(cs[i-1].NetIN, 64)
 		previousNetout, _ := strconv.ParseFloat(cs[i-1].NetOUT, 64)
-		netINSpeed := netIn - previousNetIN
-		netOUTSpeed := netOut - previousNetout
+		netINSpeed := (netIn - previousNetIN) / intervalTime
+		netOUTSpeed := (netOut - previousNetout) / intervalTime
+		if netINSpeed < 0 {
+			netINSpeed = netIn / intervalTime
+		}
+		if netOUTSpeed < 0 {
+			netOUTSpeed = netOut / intervalTime
+		}
 
 		netin_chart = append(netin_chart, XYData{readTime, netINSpeed})
 		netout_chart = append(netout_chart, XYData{readTime, netOUTSpeed})
@@ -127,14 +135,14 @@ func (cp *ContainstatsPlot) FormatChartData(cs []ContainerStatsSpec) []ChartInfo
 	return chartInfos
 }
 
-func HandleData(cl []*ContainerInfo) {
+func HandleData(cl []*ContainerInfo, intervalTime float64) {
 	for index, c := range cl {
 		handler := NewHandlerStatsFile(c.ContainerName)
 		conStatss, err := handler.ReadStatsFile(c.HostName, c.ContainerName)
 		if err != nil {
 			logger.Errorf("ReadStatsFile Error: %s", err)
 		}
-		p := NewHandlerPlot(c.HostName, c.ContainerName)
+		p := NewHandlerPlot(c.HostName, c.ContainerName, intervalTime)
 		charInfos := p.FormatChartData(conStatss)
 		logger.Debugf("hostname is %s ,The hostname contain  container'length is %d,Current index is %d ;ContainerName is %s ;charInfos' length is %d", c.HostName, len(cl), index, c.ContainerName, len(charInfos))
 		for _, d := range charInfos {

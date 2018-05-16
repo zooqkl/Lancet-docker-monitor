@@ -17,7 +17,7 @@ func main() {
 	cf := cfy.GetAllConfig()
 	mcs := make([]*monitor.MonitorCli, 0)
 	for hostname, host := range cf.Hosts {
-		mc, err := monitor.NewMonitorCliFromConf(hostname, host.Address, host.ApiVersion,cf.IntervalTime)
+		mc, err := monitor.NewMonitorCliFromConf(hostname, host.Address, host.ApiVersion, cf.IntervalTime)
 		if err != nil {
 			logger.Errorf("NewMonitorCliFromConf Error: %s", err)
 			panic(err)

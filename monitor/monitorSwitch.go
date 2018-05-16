@@ -20,7 +20,6 @@ func NewMonitorSwitch(mc []*MonitorCli) *MonitorSwitch {
 	}
 	return monitorSwitch
 }
-
 func (ms *MonitorSwitch) StartMonitor() {
 	mcs := ms.MonitorCliList
 	for _, mc := range mcs {
@@ -37,7 +36,11 @@ func (ms *MonitorSwitch) StopMonitor() {
 		logger.Errorf("getRecordDataList Error: %s", err)
 		return
 	}
-	HandleData(cl)
+	var intervalTime float64
+	if len(ms.MonitorCliList) > 0 {
+		intervalTime = ms.MonitorCliList[0].intervalTime.Seconds()
+	}
+	HandleData(cl, intervalTime)
 	logger.Debugf("Make the chart completed! please watch in 'Lancet/resultData/ChartFile' Contents !")
 	//for _, mc := range mcs {
 	//	FinishChart.Add(1)
@@ -67,7 +70,7 @@ func startOneMonitor(monCli *MonitorCli) {
 			logger.Debugf("Finish Monitor Work !")
 			return
 		default:
-			logger.Debugf("Monitor Work RuningTime is %d !",i*(int)(monCli.intervalTime))
+			logger.Debugf("Monitor Work RuningTime is %d !", i*(int)(monCli.intervalTime))
 		}
 		i++
 		time.Sleep(monCli.intervalTime)
