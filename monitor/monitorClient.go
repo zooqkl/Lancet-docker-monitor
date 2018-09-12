@@ -22,7 +22,7 @@ type MonitorCli struct {
 var FinishMonitor chan bool
 
 func NewMonitorCliFromConf(hostname string, host string, apiVersion string, intervalTime time.Duration) (*MonitorCli, error) {
-	moncli := &MonitorCli{hostname, host, apiVersion, intervalTime,nil}
+	moncli := &MonitorCli{hostname, host, apiVersion, intervalTime, nil}
 	dkcli, err := moncli.newClient()
 	if err != nil {
 		return nil, fmt.Errorf("New monitorCli Error:%s", err)
@@ -107,8 +107,9 @@ func (mc *MonitorCli) GetContainStats(hostname string, containName string) (*Con
 
 func (mc *MonitorCli) MonitorContain(hostname string, cname string) {
 	cstats, err := mc.GetContainStats(hostname, cname)
-	if err != nil {
+	if err != nil || nil == cstats {
 		logger.Errorf("GetContainStats Error: %s", err)
+		return
 	}
 	handler := NewHandlerStatsFile(cname)
 	result, err := handler.WriteStatsFile(*cstats)

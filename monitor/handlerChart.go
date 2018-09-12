@@ -6,6 +6,7 @@ import (
 	"gonum.org/v1/plot/plotutil"
 	"gonum.org/v1/plot/vg"
 	"strconv"
+	"strings"
 )
 
 type ContainstatsPlot struct {
@@ -34,16 +35,17 @@ func NewHandlerPlot(hostName string, containName string, intervalTime float64) *
 	if plotHandlers == nil {
 		plotHandlers = make(map[string]*ContainstatsPlot)
 	}
-	if handler, ok := plotHandlers[containName]; ok {
+	if handler, ok := plotHandlers[hostName+containName]; ok {
 		return handler
 	}
 	p, _ := plot.New()
-	plotHandlers[containName] = &ContainstatsPlot{HostName: hostName, ContainerName: containName, IntervalTime: intervalTime, Plot: p}
-	return plotHandlers[containName]
+	plotHandlers[hostName+containName] = &ContainstatsPlot{HostName: hostName, ContainerName: containName, IntervalTime: intervalTime, Plot: p}
+	return plotHandlers[hostName+containName]
 }
 func (cp *ContainstatsPlot) MakeChart(ci ChartInfo) {
 	p := cp.Plot
-	p.Title.Text = ci.Title
+
+	p.Title.Text =  ci.Title
 	p.X.Label.Text = ci.XLabel
 	p.Y.Label.Text = ci.YLabel
 
@@ -65,7 +67,9 @@ func (cp *ContainstatsPlot) MakeChart(ci ChartInfo) {
 			plotutil.AddLinePoints(p, point)
 		}
 	}
-	fileName := cp.HostName + "-" + cp.ContainerName + "-" + p.Title.Text + ".png"
+	//NET Speed \n green-netIn  red-netOut ==> NET Speed
+
+	fileName := cp.HostName + "-" + cp.ContainerName + "-" + strings.Split(ci.Title,"\n")[0] + ".png"
 	filePath := "./resultData/ChartFile/" + fileName
 	err := p.Save(4*vg.Inch, 4*vg.Inch, filePath)
 	if err != nil {
@@ -80,10 +84,10 @@ func (cp *ContainstatsPlot) MakeChart(ci ChartInfo) {
 func (cp *ContainstatsPlot) FormatChartData(cs []ContainerStatsSpec) []ChartInfo {
 	//chartInfos := make([]ChartInfo)
 	var chartInfos []ChartInfo
-	chartInfos = append(chartInfos, ChartInfo{Title: "CPU资源占用", XLabel: "Time", YLabel: "CPU   %"})
-	chartInfos = append(chartInfos, ChartInfo{Title: "Memory资源占用", XLabel: "Time", YLabel: "MEMORY   %"})
-	chartInfos = append(chartInfos, ChartInfo{Title: "NET带宽Speed占用", XLabel: "Time", YLabel: "NetSpeed  mb/s"})
-	chartInfos = append(chartInfos, ChartInfo{Title: "BLOCK资源占用", XLabel: "Time", YLabel: "BLOCK  MB"})
+	chartInfos = append(chartInfos, ChartInfo{Title: "CPU", XLabel: "Time", YLabel: "CPU   %"})
+	chartInfos = append(chartInfos, ChartInfo{Title: "Memory", XLabel: "Time", YLabel: "MEMORY   %"})
+	chartInfos = append(chartInfos, ChartInfo{Title: "NET Speed \ngreen-netIn  red-netOut ", XLabel: "Time", YLabel: "NetSpeed  mb/s"})
+	chartInfos = append(chartInfos, ChartInfo{Title: "BLOCKIO \ngreen-blockWrite  red-blockRead   ", XLabel: "Time", YLabel: "BLOCK  MB"})
 
 	//var  cpu_charts, mem_charts, net_charts, blk_charts [][] XYData
 	var cpu_chart, mem_chart, netin_chart, netout_chart, blkRead_chart, blkWrite_chart []XYData
