@@ -1,10 +1,10 @@
 package monitor
 
 import (
-	"time"
-	"strings"
-	"io/ioutil"
 	"fmt"
+	"io/ioutil"
+	"strings"
+	"time"
 )
 
 type MonitorSwitch struct {
@@ -59,7 +59,14 @@ func startOneMonitor(monCli *MonitorCli) {
 	for {
 		//每隔1分钟获取一次容器List，防止中途有容器挂掉，还在监控
 		if i*(int)(monCli.intervalTime/time.Second)%60 == 0 {
-			cl, _ = monCli.GetContainList()
+			cl_new, _ := monCli.GetContainList()
+			if result, diff := diffContainerlist(cl, cl_new); diff {
+				msg := fmt.Sprintf("Contain is shuntDown! please checkout it!\n %v", result)
+				if Mail != nil {
+					go Mail.sendMail(msg)
+				}
+				cl = cl_new
+			}
 		}
 		for _, c := range cl {
 			logger.Debugf("start MonitorContain[%s]!", c.ContainerName)
@@ -93,4 +100,36 @@ func getRecordDataList() ([]*ContainerInfo, error) {
 		containerList = append(containerList, conInfo)
 	}
 	return containerList, nil
+}
+
+func diffContainerlist(containerList1 []*ContainerInfo, containerList2 []*ContainerInfo) ([]string, bool) {
+
+	if len(containerList1) == len(containerList2) {
+		return nil, false
+	}
+	var allData string
+	var result []string
+
+	if len(containerList1) < len(containerList2) {
+		for _, contain := range containerList1 {
+			allData += contain.ContainerName
+		}
+		for _, contain := range containerList2 {
+			if !strings.Contains(allData, contain.ContainerName) {
+				result = append(result, contain.HostName+"-"+contain.ContainerName)
+			}
+		}
+
+	} else {
+		for _, contain := range containerList2 {
+			allData += contain.ContainerName
+		}
+		for _, contain := range containerList1 {
+			if !strings.Contains(allData, contain.ContainerName) {
+				result = append(result, contain.HostName+"-"+contain.ContainerName)
+			}
+		}
+	}
+
+	return result, true
 }

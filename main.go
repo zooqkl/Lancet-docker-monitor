@@ -15,6 +15,7 @@ func main() {
 		logger.Errorf("LoadFromFile Error: %s", err)
 	}
 	cf := cfy.GetAllConfig()
+	monitor.NewMail(cf.Mail.MailUser, cf.Mail.MailPasswd, cf.Mail.SmtpHost, cf.Mail.ReceiveMail)
 	mcs := make([]*monitor.MonitorCli, 0)
 	for hostname, host := range cf.Hosts {
 		mc, err := monitor.NewMonitorCliFromConf(hostname, host.Address, host.ApiVersion, cf.IntervalTime)

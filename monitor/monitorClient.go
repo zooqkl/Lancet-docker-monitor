@@ -111,10 +111,10 @@ func (mc *MonitorCli) MonitorContain(hostname string, cname string) {
 		logger.Errorf("GetContainStats Error: %s", err)
 		return
 	}
-	handler := NewHandlerStatsFile(cname)
+	handler := NewHandlerStatsFile(hostname, cname)
 	result, err := handler.WriteStatsFile(*cstats)
 	if err != nil {
 		logger.Errorf("WriteStatsFile Error: %s", err)
 	}
-	logger.Debugf("Container [%s] WriteStatsFile 's result is   %t", cname, result)
+	logger.Debugf("Container [%s] WriteStatsFile 's result is   %t", hostname+"-"+cname, result)
 }

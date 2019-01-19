@@ -82,7 +82,7 @@ func reloadConfigFromFile(v *viper.Viper, cf *ConfigFactory) error {
 	monitorTime := cf.cfg.Time.Seconds()
 	intervalTime := cf.cfg.IntervalTime.Seconds()
 	if monitorTime <= 0 || intervalTime <= 0 {
-		panic(fmt.Errorf("monitorTime is %d , intervalTime is %d ,The value must greater than zero!",int(monitorTime),int(intervalTime)))
+		panic(fmt.Errorf("monitorTime is %d , intervalTime is %d ,The value must greater than zero!", int(monitorTime), int(intervalTime)))
 	}
 	monitorSwitch := v.GetBool("monitorSwitch")
 	if !monitorSwitch {
@@ -90,6 +90,7 @@ func reloadConfigFromFile(v *viper.Viper, cf *ConfigFactory) error {
 	}
 
 	v.UnmarshalKey("monitorHosts", &cf.cfg.Hosts)
+	v.UnmarshalKey("mailNotice", &cf.cfg.Mail)
 
 	err := cf.CheckConfig()
 	if err != nil {

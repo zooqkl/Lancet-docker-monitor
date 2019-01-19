@@ -25,17 +25,17 @@ type Handlers struct {
 
 var handlers *Handlers
 
-func NewHandlerStatsFile(containName string) *HandlerStatsFile {
+func NewHandlerStatsFile(hostname string, containName string) *HandlerStatsFile {
 	if handlers == nil {
 		handlers = &Handlers{
 			HandlersMap: make(map[string]*HandlerStatsFile),
 		}
 	}
-	if handler, ok := handlers.getHandler(containName); ok {
+	if handler, ok := handlers.getHandler(hostname + containName); ok {
 		return handler
 	}
 	handler := &HandlerStatsFile{ContainerName: containName}
-	handlers.setHandler(containName, handler)
+	handlers.setHandler(hostname+containName, handler)
 	return handler
 }
 
@@ -73,7 +73,7 @@ func (h *HandlerStatsFile) WriteStatsFile(cs ContainerStatsSpec) (bool, error) {
 	//当获取不到容器数据时，计算出的timeTamps < 0
 	timesTampsInt, err := strconv.Atoi(timesTamps)
 	if timesTampsInt < 0 || err != nil {
-		return false, fmt.Errorf("Current Container [%s] stats isn't running!,Don't write mointorData! Error :%s",cs.HostName+"-"+cs.ContainerName,err)
+		return false, fmt.Errorf("Current Container [%s] stats isn't running!,Don't write mointorData! Error :%s", cs.HostName+"-"+cs.ContainerName, err)
 	}
 	tpsExclWrite.Write([]string{timesTamps, cs.Cpu, cs.Memory, cs.NetIN, cs.NetOUT, cs.BlockRead, cs.BlockWrite})
 	tpsExclWrite.Flush()

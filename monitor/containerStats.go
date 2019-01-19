@@ -82,12 +82,22 @@ func (cs *ContainerStatsSpec) calculateMemory(containStats []byte) (float64, err
 	if err != nil {
 		return 0.0, err
 	}
+
+	//memUsage, _ := j.Get("memory_stats").Get("usage").Float64()
+	//memLimit, _ := j.Get("memory_stats").Get("limit").Float64()
+	//memCache, _ := j.Get("memory_stats").Get("stats").Get("cache").Float64()
+	//
+	//if memUsage > 0.0 && memLimit > 0.0 && memCache >= 0.0 {
+	//	memPercent = ((float64(memUsage) - float64(memCache)) / float64(memLimit)) * 100.0
+	//}
+
 	memUsage, _ := j.Get("memory_stats").Get("usage").Float64()
 	memLimit, _ := j.Get("memory_stats").Get("limit").Float64()
 
 	if memUsage > 0.0 && memLimit > 0.0 {
 		memPercent = (float64(memUsage) / float64(memLimit)) * 100.0
 	}
+
 	return memPercent, nil
 }
 

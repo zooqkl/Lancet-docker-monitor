@@ -7,6 +7,7 @@ import (
 	"gonum.org/v1/plot/vg"
 	"strconv"
 	"strings"
+	"os"
 )
 
 type ContainstatsPlot struct {
@@ -45,7 +46,7 @@ func NewHandlerPlot(hostName string, containName string, intervalTime float64) *
 func (cp *ContainstatsPlot) MakeChart(ci ChartInfo) {
 	p := cp.Plot
 
-	p.Title.Text =  ci.Title
+	p.Title.Text = ci.Title
 	p.X.Label.Text = ci.XLabel
 	p.Y.Label.Text = ci.YLabel
 
@@ -69,12 +70,15 @@ func (cp *ContainstatsPlot) MakeChart(ci ChartInfo) {
 	}
 	//NET Speed \n green-netIn  red-netOut ==> NET Speed
 
-	fileName := cp.HostName + "-" + cp.ContainerName + "-" + strings.Split(ci.Title,"\n")[0] + ".png"
+	fileName := cp.HostName + "-" + cp.ContainerName + "-" + strings.Split(ci.Title, "\n")[0] + ".png"
+	if err := CreatePath("./resultData/ChartFile/"); err != nil {
+		logger.Fatal(err)
+	}
 	filePath := "./resultData/ChartFile/" + fileName
+
 	err := p.Save(4*vg.Inch, 4*vg.Inch, filePath)
 	if err != nil {
-		logger.Errorf("MakeChart %s  Error: %s", fileName, err)
-		panic(err)
+		logger.Fatalf("MakeChart %s  Error: %s", fileName, err)
 	}
 	// clear old data
 	p.Clear()
@@ -141,7 +145,7 @@ func (cp *ContainstatsPlot) FormatChartData(cs []ContainerStatsSpec) []ChartInfo
 
 func HandleData(cl []*ContainerInfo, intervalTime float64) {
 	for index, c := range cl {
-		handler := NewHandlerStatsFile(c.ContainerName)
+		handler := NewHandlerStatsFile(c.HostName,c.ContainerName)
 		conStatss, err := handler.ReadStatsFile(c.HostName, c.ContainerName)
 		if err != nil {
 			logger.Errorf("ReadStatsFile Error: %s", err)
@@ -154,4 +158,14 @@ func HandleData(cl []*ContainerInfo, intervalTime float64) {
 		}
 	}
 	//FinishChart.Done()
+}
+
+// 判断文件夹是否存在,若不存在则创建
+func CreatePath(path string) (error) {
+	_, err := os.Stat(path)
+	if err != nil && os.IsNotExist(err) {
+		err = os.Mkdir(path, os.ModePerm)
+		return err
+	}
+	return nil
 }
