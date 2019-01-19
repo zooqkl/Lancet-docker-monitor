@@ -1,15 +1,18 @@
 monitorHosts:
+##监控的服务器名称
   host17:
+  ##监控的服务器地址，和docker端口
     address: tcp://192.168.56.101:2375
     apiVersion: 1.26
+
 intervalTime: 5s
 monitorTime: 20h
 monitorSwitch: false
 ##当监控的容器挂掉的时候，将会通过邮件通知
 mailNotice:
-  mailUser: lilei@yunphant.com
+  mailUser: xxx@qq.com
   mailPasswd: 8WDSaWvjehE5zRek
   smtpHost: smtp.exmail.qq.com:587
   receiveMail:
-    - lilei@yunphant.com
+    - zooqkl@gmail.com
     - 728129018@qq.com
