@@ -79,22 +79,14 @@ func reloadConfigFromFile(v *viper.Viper, cf *ConfigFactory) error {
 	logger.Debugf("ConfigFactory is %v ;\n  viper is %v", cf, v)
 	cf.cfg.Time = v.GetDuration("monitorTime")
 	cf.cfg.IntervalTime = v.GetDuration("intervalTime")
-	monitorTime := cf.cfg.Time.Seconds()
-	intervalTime := cf.cfg.IntervalTime.Seconds()
-	if monitorTime <= 0 || intervalTime <= 0 {
-		panic(fmt.Errorf("monitorTime is %d , intervalTime is %d ,The value must greater than zero!", int(monitorTime), int(intervalTime)))
-	}
-	monitorSwitch := v.GetBool("monitorSwitch")
-	if !monitorSwitch {
-		panic(fmt.Errorf("MonitorSwitch is %t,please set MonitorSwitch is true!", monitorSwitch))
-	}
-
+	cf.cfg.MonitorSwitch = v.GetBool("monitorSwitch")
 	v.UnmarshalKey("monitorHosts", &cf.cfg.Hosts)
 	v.UnmarshalKey("mailNotice", &cf.cfg.Mail)
+	v.UnmarshalKey("tls", &cf.cfg.Tls)
 
 	err := cf.CheckConfig()
 	if err != nil {
-		return fmt.Errorf("Check config error: %s", err)
+		panic(fmt.Errorf("Check config error: %s", err))
 	}
 	return nil
 }

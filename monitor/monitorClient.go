@@ -9,21 +9,24 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"github.com/docker/go-connections/tlsconfig"
 )
 
 type MonitorCli struct {
-	Hostname     string
-	host         string
-	apiVersion   string
-	intervalTime time.Duration
-	dockerClient *client.Client
+	Hostname       string
+	host           string
+	apiVersion     string
+	intervalTime   time.Duration
+	dockerClient   *client.Client
+	tlsSwitch      bool
+	clientCertPath []string
 }
 
 var FinishMonitor chan bool
 
-func NewMonitorCliFromConf(hostname string, host string, apiVersion string, intervalTime time.Duration) (*MonitorCli, error) {
-	moncli := &MonitorCli{hostname, host, apiVersion, intervalTime, nil}
-	dkcli, err := moncli.newClient()
+func NewMonitorCliFromConf(hostname string, host string, apiVersion string, intervalTime time.Duration, tlsSwitch bool, tlsCertPath []string) (*MonitorCli, error) {
+	moncli := &MonitorCli{hostname, host, apiVersion, intervalTime, nil, tlsSwitch, tlsCertPath}
+	dkcli, err := moncli.newClient(tlsSwitch, tlsCertPath)
 	if err != nil {
 		return nil, fmt.Errorf("New monitorCli Error:%s", err)
 	}
@@ -31,12 +34,35 @@ func NewMonitorCliFromConf(hostname string, host string, apiVersion string, inte
 	return moncli, nil
 }
 
-func (mc *MonitorCli) newClient() (*client.Client, error) {
+func (mc *MonitorCli) newClient(tlsSwitch bool, tlsCertPath []string) (*client.Client, error) {
 
 	if mc.dockerClient != nil {
 		return mc.dockerClient, nil
 	}
 	var httpClient *http.Client
+
+	if tlsSwitch {
+		if len(tlsCertPath) != 3 {
+			return nil, fmt.Errorf("ClientCertPath's length error，expect 3 !")
+		}
+		options := tlsconfig.Options{
+			CAFile:             tlsCertPath[0],
+			CertFile:           tlsCertPath[1],
+			KeyFile:            tlsCertPath[2],
+			InsecureSkipVerify: tlsSwitch,
+		}
+		tlsc, err := tlsconfig.Client(options)
+		if err != nil {
+			return nil, err
+		}
+
+		httpClient = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: tlsc,
+			},
+		}
+	}
+
 	cli, err := client.NewClient(mc.host, mc.apiVersion, httpClient, nil)
 	if err != nil {
 		return nil, fmt.Errorf("NewClient connection error: %s", err)

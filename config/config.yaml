@@ -8,6 +8,13 @@ monitorHosts:
 intervalTime: 5s
 monitorTime: 20h
 monitorSwitch: false
+tls:
+    tlsSwitch: true
+##证书顺序为1、ca.crt 2、cert.pem 3、key.pem,不能错
+    clientCertPath:
+          - config/tls/ca.crt
+          - config/tls/cert.pem
+          - config/tls/key.pem
 ##当监控的容器挂掉的时候，将会通过邮件通知
 mailNotice:
   mailUser: xxx@qq.com

@@ -7,10 +7,12 @@ package config
 import "time"
 
 type Config struct {
-	Hosts        map[string]MonitorHosts
-	IntervalTime time.Duration
-	Time         time.Duration
-	Mail         MailNotice
+	Hosts         map[string]MonitorHosts
+	IntervalTime  time.Duration
+	Time          time.Duration
+	MonitorSwitch bool
+	Tls           Tls
+	Mail          MailNotice
 }
 
 type MonitorHosts struct {
@@ -23,4 +25,9 @@ type MailNotice struct {
 	MailPasswd  string
 	SmtpHost    string
 	ReceiveMail []string
+}
+
+type Tls struct {
+	TlsSwitch      bool
+	ClientCertPath []string
 }

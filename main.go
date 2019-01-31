@@ -18,7 +18,7 @@ func main() {
 	monitor.NewMail(cf.Mail.MailUser, cf.Mail.MailPasswd, cf.Mail.SmtpHost, cf.Mail.ReceiveMail)
 	mcs := make([]*monitor.MonitorCli, 0)
 	for hostname, host := range cf.Hosts {
-		mc, err := monitor.NewMonitorCliFromConf(hostname, host.Address, host.ApiVersion, cf.IntervalTime)
+		mc, err := monitor.NewMonitorCliFromConf(hostname, host.Address, host.ApiVersion, cf.IntervalTime, cf.Tls.TlsSwitch, cf.Tls.ClientCertPath)
 		if err != nil {
 			logger.Errorf("NewMonitorCliFromConf Error: %s", err)
 			panic(err)

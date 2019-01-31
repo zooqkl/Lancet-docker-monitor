@@ -48,15 +48,8 @@ docker version
  intervalTime: 1s
  monitorTime: 30s
  monitorSwitch: true
- mailNotice:
-  mailUser: xxx@qq.com
-  mailPasswd: 8WDSaWvjehE5zRek
-  smtpHost: smtp.exmail.qq.com:587
-  receiveMail:
-    - zooqkl@gmail.com
-    - 728129018@qq.com
-```
-
+``` 
+ 
  monitorHosts 下面可以配置多个host，配置address和apiversion即可。
 
  hostname是作为区分host用的，上面实例用host10、host54来作为hostname。
@@ -67,18 +60,3 @@ docker version
 
  monitorSwitch ：用作在中途紧急停止监控，启动时必须为 true。 例如:monitorTime 配置 2h，但监控了1h后，数据已经足够，
  monitorSwitch设置为false，将紧急停止监控，并将已获取的数据制成图表。
- mailNotice: 邮件通知相关配置。
- mailUser: 将通过该邮箱发送通知邮件。
- mailPasswd： 邮箱密码，最好配置为邮箱生成的授权码。
- smtpHost: 邮件服务器地址，此处为qq的地址，可配置为别家的。
- receiveMail：接收邮件的地址，可配置为列表。
-
- 生成的图表如下：
-
- ![](https://ws2.sinaimg.cn/large/006tNc79ly1fzcb6u35bvj30ao0aoq38.jpg)
-
- ![](https://ws3.sinaimg.cn/large/006tNc79ly1fzcb7e8c6jj30ao0aodg0.jpg)
-
- ![](https://ws2.sinaimg.cn/large/006tNc79ly1fzcb7jarwqj30ao0aoq32.jpg)
-
- ![](https://ws2.sinaimg.cn/large/006tNc79ly1fzcb7nrrxqj30ao0aoaaw.jpg)
